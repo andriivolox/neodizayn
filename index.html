@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -135,7 +96,7 @@
             align-items: center;
             gap: 10px;
         }
-        .search-bar select, .search-bar input[type="number"] {
+        .search-bar select {
             padding: 5px;
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -370,12 +331,16 @@
         <h1 class="seo-hidden">Зовнішня реклама Нео Дизайн</h1>
         <div class="search-bar">
             <select id="searchType">
-                <option value="">Тип реклами</option>
-                <option value="billboard">Білборд</option>
-                <option value="sign">Вивіска</option>
-                <option value="banner">Банер</option>
+                <option value="">Тип послуги</option>
+                <option value="neon-sign">Неонові вивіски</option>
+                <option value="led-screen">LED екрани</option>
+                <option value="city-light">Сітілайти</option>
+                <option value="volume-sign">Об'ємні вивіски</option>
+                <option value="banner">Банери</option>
+                <option value="furniture">Міські меблі</option>
+                <option value="printing">Друк</option>
+                <option value="design">Дизайн</option>
             </select>
-            <input type="number" id="searchPrice" placeholder="Ціна до (грн)" min="0">
             <button onclick="searchServices()">🔍</button>
         </div>
     </header>
@@ -383,43 +348,143 @@
     <div id="services">
         <h2 class="seo-hidden">Послуги зовнішньої реклами</h2>
 
-        <div class="container visible" data-type="billboard" data-price="15000">
-            <h3>Білборд, 6x3 м, 15,000 грн</h3>
-            <p>📍 Локація: м. Вінниця, вул. Хмельницьке шосе</p>
-            <p>📏 Розмір: 6x3 м</p>
-            <p>🛠 Матеріал: Вініл</p>
-            <button class="details-button">
-                <a href="billboard-vinnitsa-khmelnytske.html">Детальніше</a>
-            </button>
-        </div>
-
-        <div class="container visible" data-type="sign" data-price="8000">
-            <h3>Вивіска світлодіодна, 8,000 грн</h3>
-            <p>📍 Локація: м. Вінниця, вул. Соборна</p>
-            <p>📏 Розмір: 2x0.5 м</p>
-            <p>🛠 Матеріал: Акрил, LED</p>
-            <button class="details-button">
-                <a href="sign-vinnitsa-soborna.html">Детальніше</a>
-            </button>
-        </div>
-
-        <div class="container visible" data-type="banner" data-price="5000">
-            <h3>Банер, 3x2 м, 5,000 грн</h3>
-            <p>📍 Локація: м. Вінниця, вул. Пирогова</p>
-            <p>📏 Розмір: 3x2 м</p>
-            <p>🛠 Матеріал: ПВХ</p>
-            <button class="details-button">
-                <a href="banner-vinnitsa-pyrohova.html">Детальніше</a>
-            </button>
-        </div>
-
-        <div class="container visible" data-type="billboard" data-price="20000" onclick="showDetails('Білборд, вул. Київська, 20,000 грн', ['assets/images/billboard-kyivska-1.png', 'assets/images/billboard-kyivska-2.png'], '')">
-            <h3>Білборд, 6x3 м, 20,000 грн</h3>
-            <p>📍 Локація: м. Вінниця, вул. Київська</p>
-            <p>📏 Розмір: 6x3 м</p>
-            <p>🛠 Матеріал: Вініл, підсвітка</p>
+        <div class="container visible" data-type="neon-sign" onclick="showDetails('Комбіновані вивіски', ['assets/images/neon-sign-1.png', 'assets/images/neon-sign-2.png'], 'Неонові вивіски з комбінованим підсвічуванням для яскравого ефекту.')">
+            <h3>Комбіновані вивіски</h3>
+            <p>💡 Особливість: Яскраве неонове підсвічування</p>
+            <p>🎯 Застосування: Для магазинів та кафе</p>
+            <p>🛠 Матеріал: Акрил, неон</p>
             <button class="details-button">
                 <a href="#details-1">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="neon-sign" onclick="showDetails('Світлові вивіски', ['assets/images/neon-sign-3.png'], 'Світлові вивіски для створення унікального стилю.')">
+            <h3>Світлові вивіски</h3>
+            <p>💡 Особливість: Рівномірне світло</p>
+            <p>🎯 Застосування: Для салонів та офісів</p>
+            <p>🛠 Матеріал: Акрил, LED</p>
+            <button class="details-button">
+                <a href="#details-2">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="led-screen" onclick="showDetails('LED монохромне табло', ['assets/images/led-screen-1.png'], 'Монохромні LED табло для чіткої інформації.')">
+            <h3>LED монохромне табло</h3>
+            <p>💡 Особливість: Чіткий текст</p>
+            <p>🎯 Застосування: Для інформаційних повідомлень</p>
+            <p>🛠 Матеріал: LED модулі</p>
+            <button class="details-button">
+                <a href="#details-3">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="led-screen" onclick="showDetails('Повноколірний вуличний екран', ['assets/images/led-screen-2.png'], 'Повноколірний екран для яскравої реклами.')">
+            <h3>Повноколірний вуличний екран</h3>
+            <p>💡 Особливість: Яскраві кольори</p>
+            <p>🎯 Застосування: Для вуличної реклами</p>
+            <p>🛠 Матеріал: LED модулі</p>
+            <button class="details-button">
+                <a href="#details-4">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="city-light" onclick="showDetails('Вивіски в метро, міські меблі', ['assets/images/city-light-1.png'], 'Вивіски в метро та міські меблі для реклами.')">
+            <h3>Вивіски в метро, міські меблі</h3>
+            <p>💡 Особливість: Компактний формат</p>
+            <p>🎯 Застосування: Для міського транспорту</p>
+            <p>🛠 Матеріал: Алюміній, скло</p>
+            <button class="details-button">
+                <a href="#details-5">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="volume-sign" onclick="showDetails('Об’ємні світлові вивіски', ['assets/images/volume-sign-1.png'], 'Об’ємні світлові вивіски для привернення уваги.')">
+            <h3>Об’ємні світлові вивіски</h3>
+            <p>💡 Особливість: 3D ефект</p>
+            <p>🎯 Застосування: Для торгових центрів</p>
+            <p>🛠 Матеріал: Акрил, LED</p>
+            <button class="details-button">
+                <a href="#details-6">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="banner" onclick="showDetails('Широкоформатний друк', ['assets/images/banner-1.png'], 'Широкоформатний друк для банерів та реклами.')">
+            <h3>Широкоформатний друк</h3>
+            <p>💡 Особливість: Висока якість друку</p>
+            <p>🎯 Застосування: Для зовнішньої реклами</p>
+            <p>🛠 Матеріал: ПВХ</p>
+            <button class="details-button">
+                <a href="#details-7">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="banner" onclick="showDetails('Оренда рекламних носіїв', ['assets/images/banner-2.png'], 'Оренда рекламних носіїв для розміщення реклами.')">
+            <h3>Оренда рекламних носіїв</h3>
+            <p>💡 Особливість: Гнучкі терміни</p>
+            <p>🎯 Застосування: Для тимчасових кампаній</p>
+            <p>🛠 Матеріал: Вініл</p>
+            <button class="details-button">
+                <a href="#details-8">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="furniture" onclick="showDetails('Вивіски в метро, міські меблі', ['assets/images/furniture-1.png'], 'Міські меблі з рекламними вивісками.')">
+            <h3>Вивіски в метро, міські меблі</h3>
+            <p>💡 Особливість: Функціональний дизайн</p>
+            <p>🎯 Застосування: Для громадських місць</p>
+            <p>🛠 Матеріал: Алюміній, LED</p>
+            <button class="details-button">
+                <a href="#details-9">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="printing" onclick="showDetails('Вакуумна формовка пластикових виробів', ['assets/images/printing-1.png'], 'Вакуумна формовка для створення пластикових виробів.')">
+            <h3>Вакуумна формовка пластикових виробів</h3>
+            <p>💡 Особливість: Точне формування</p>
+            <p>🎯 Застосування: Для створення об’ємних елементів</p>
+            <p>🛠 Матеріал: Пластик</p>
+            <button class="details-button">
+                <a href="#details-10">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="printing" onclick="showDetails('Друк на листових матеріалах', ['assets/images/printing-2.png'], 'Друк на листових матеріалах для реклами.')">
+            <h3>Друк на листових матеріалах</h3>
+            <p>💡 Особливість: Стійкість до погодних умов</p>
+            <p>🎯 Застосування: Для зовнішньої реклами</p>
+            <p>🛠 Матеріал: Пластик</p>
+            <button class="details-button">
+                <a href="#details-11">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="printing" onclick="showDetails('Світлова лаконічна реклама', ['assets/images/printing-3.png'], 'Світлова лаконічна реклама для привернення уваги.')">
+            <h3>Світлова лаконічна реклама</h3>
+            <p>💡 Особливість: Енергоефективність</p>
+            <p>🎯 Застосування: Для невеликих вивісок</p>
+            <p>🛠 Матеріал: Акрил, LED</p>
+            <button class="details-button">
+                <a href="#details-12">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="design" onclick="showDetails('Оформлення АЗС', ['assets/images/design-1.png'], 'Оформлення АЗС для створення єдиного стилю.')">
+            <h3>Оформлення АЗС</h3>
+            <p>💡 Особливість: Єдиний стиль</p>
+            <p>🎯 Застосування: Для брендування АЗС</p>
+            <p>🛠 Матеріал: Алюміній, LED</p>
+            <button class="details-button">
+                <a href="#details-13">Детальніше</a>
+            </button>
+        </div>
+
+        <div class="container visible" data-type="design" onclick="showDetails('Фрезерно-гравіювальні послуги', ['assets/images/design-2.png'], 'Фрезерно-гравіювальні послуги для створення унікальних елементів.')">
+            <h3>Фрезерно-гравіювальні послуги</h3>
+            <p>💡 Особливість: Висока точність</p>
+            <p>🎯 Застосування: Для створення декоративних елементів</p>
+            <p>🛠 Матеріал: Алюміній</p>
+            <button class="details-button">
+                <a href="#details-14">Детальніше</a>
             </button>
         </div>
 
@@ -444,8 +509,8 @@
 
     <div id="contacts" class="container">
         <h2>Контакти</h2>
-        <p>📞 Телефон: <a href="tel:+380674290579">+38 (067) 429-05-79</a></p>
-        <p>📱 Viber: +38 (067) 429-05-79</p>
+        <p>📞 Телефон: <a href="tel:+380633889856">+38 (063) 388-98-56</a></p>
+        <p>📱 Viber: +38 (063) 388-98-56</p>
         <p>❔ Маєте запитання чи потрібна додаткова інформація? 😊 Ми завжди раді допомогти!</p>
         <p>🌐 Приєднуйтесь до нашого <a href="https://t.me/NeoDesignUA" target="_blank">телеграм-каналу</a>!</p>
     </div>
@@ -461,7 +526,7 @@
             <div class="thumbnails" id="modalThumbnails"></div>
             <p id="modalDescription"></p>
             <p>📞 <strong>Зв'яжіться з нами для замовлення або додаткової інформації!</strong></p>
-            <p><a href="tel:+380674290579">+38 (067) 429-05-79</a></p>
+            <p><a href="tel:+380633889856">+38 (063) 388-98-56</a></p>
             <button class="close-modal" onclick="closeModal()">Закрити</button>
         </div>
     </div>
@@ -494,19 +559,13 @@
 
         function searchServices() {
             const searchType = document.getElementById('searchType').value;
-            const searchPrice = document.getElementById('searchPrice').value;
             const services = document.querySelectorAll('#services .container');
             const noResults = document.getElementById('no-results');
             let hasResults = false;
 
             services.forEach(service => {
                 const type = service.getAttribute('data-type');
-                const price = service.getAttribute('data-price');
-
-                if (
-                    (searchType === "" || type === searchType) &&
-                    (searchPrice === "" || price <= searchPrice)
-                ) {
+                if (searchType === "" || type === searchType) {
                     service.classList.add('visible');
                     hasResults = true;
                 } else {
